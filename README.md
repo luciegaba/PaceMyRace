@@ -59,3 +59,13 @@ This project focuses on creating an app to schedule running sessions and track p
 
 --------
 
+## To do list
+- Link Strava 
+- Past activities: 
+    - Dashboard of performance (choose KPI: bpm, etc..)
+    - Expander par date antérieurs (last week, last month): one line per activity, and click on it and get the review 
+    - Link the target from planning (what is expected) to real time
+        
+
+- 
+
