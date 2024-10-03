@@ -1,12 +1,9 @@
 import streamlit as st
 import pandas as pd
 from streamlit_calendar import calendar
-from pacemyrace.database.create_db import add_run_session,get_db_connection
+from pacemyrace.app.data.create_db import add_run_session,get_db_connection
+from pacemyrace.app.data.googlecalendar import authentificate_googlecalendar,synchronise_planning
 from pacemyrace.app.home import session_types
-# # st.set_page_config(page_title="Demo for streamlit-calendar", page_icon="📆")
-
-
-
 
 def calendar_tab(session_types):
     
@@ -17,7 +14,7 @@ def calendar_tab(session_types):
     cursor.execute("SELECT * FROM sessions")
     rows = cursor.fetchall()
     conn.close()
-    df = pd.DataFrame(rows, columns=["id", "date", "session_type", "pace_target", "time_target", "distance_target"])
+    df = pd.DataFrame(rows, columns=["id", "date", "session_type", "pace_target", "time_target", "distance_target","session_description"])
     df['color'] = df['session_type'].map(session_types)
     st.dataframe(df)    
 
@@ -59,6 +56,21 @@ def calendar_tab(session_types):
             key="daygrid",
         )
 
-    st.write(state)
+
+    if "eventClick" in state:
+        st.write(state["eventClick"]["event"]["title"], state["eventClick"]["event"]["start"])
+        session_type_clicked = state["eventClick"]["event"]["title"]  # session_type
+        date_clicked = state["eventClick"]["event"]["start"]          # date
+        date_clicked = pd.to_datetime(date_clicked).strftime('%Y-%m-%d')
+        filtered_df = df[(df['session_type'] == session_type_clicked) & (df['date'] == date_clicked)]
+        st.dataframe(filtered_df)
+        
+      
+    if st.button("Synchronise with Google"):  
+        service = authentificate_googlecalendar()
+        if service is not None:
+            st.success("Successfully identified")
+                
+            synchronise_planning(service,df.to_dict(orient="records"))
         
 calendar_tab(session_types)
